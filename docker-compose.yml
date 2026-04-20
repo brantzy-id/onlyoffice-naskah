@@ -1,0 +1,13 @@
+services:
+  build:
+    build:
+      context: ./wasm
+      dockerfile: Dockerfile
+    volumes:
+      - ./web-apps:/workspace/web-apps:ro
+      - ./build_tools:/workspace/build_tools:ro
+      - ./output:/output
+    working_dir: /workspace
+    environment:
+      - VERSION=${VERSION:-dev}
+    command: /workspace/build.sh ${VERSION:-dev}
