@@ -1,0 +1,6 @@
+[submodule "web-apps"]
+	path = web-apps
+	url = git@github-brantzy:brantzy-id/onlyoffice-web-apps.git
+[submodule "build_tools"]
+	path = build_tools
+	url = https://github.com/ONLYOFFICE/build_tools.git
