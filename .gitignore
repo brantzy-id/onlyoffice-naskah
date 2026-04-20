@@ -1,0 +1,3 @@
+output/
+*.wasm
+node_modules/

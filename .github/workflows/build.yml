@@ -1,0 +1,84 @@
+name: Build WASM & Upload to R2
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'web-apps/**'
+      - 'wasm/**'
+      - 'patches/**'
+      - 'dictionaries/**'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version tag (e.g. v1.3.0). Leave empty to auto-generate.'
+        required: false
+
+jobs:
+  build:
+    name: Build OnlyOffice WASM
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+
+    steps:
+      - name: Checkout repo + submodules
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Set version
+        id: version
+        run: |
+          if [ -n "${{ github.event.inputs.version }}" ]; then
+            VERSION="${{ github.event.inputs.version }}"
+          else
+            # Auto-generate dari short SHA
+            VERSION="v0.0.0-$(git rev-parse --short HEAD)"
+          fi
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "Building version: $VERSION"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Cache Docker layers
+        uses: actions/cache@v4
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ hashFiles('wasm/Dockerfile') }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      - name: Build WASM via Docker
+        run: |
+          docker compose run --rm build
+        env:
+          WASM_VERSION: ${{ steps.version.outputs.VERSION }}
+
+      - name: Verify output exists
+        run: |
+          if [ ! -f "output/naskah-editor.wasm" ]; then
+            echo "ERROR: naskah-editor.wasm not found in output/"
+            exit 1
+          fi
+          echo "Build output:"
+          ls -lah output/
+
+      - name: Upload to Cloudflare R2
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CF_R2_API_TOKEN }}
+          command: r2 object put ${{ secrets.CF_R2_BUCKET_NAME }}/wasm/${{ steps.version.outputs.VERSION }}/ --file=output/ --recursive
+
+      - name: Summary
+        run: |
+          echo "## ✅ WASM Build Selesai" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Versi:** \`${{ steps.version.outputs.VERSION }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**URL CDN:**" >> $GITHUB_STEP_SUMMARY
+          echo "\`https://cdn.naskah.id/wasm/${{ steps.version.outputs.VERSION }}/\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Langkah berikutnya:**" >> $GITHUB_STEP_SUMMARY
+          echo "Update \`NUXT_PUBLIC_WASM_VERSION=${{ steps.version.outputs.VERSION }}\` di repo platform." >> $GITHUB_STEP_SUMMARY
