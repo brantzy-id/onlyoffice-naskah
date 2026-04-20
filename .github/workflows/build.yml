@@ -33,7 +33,6 @@ jobs:
           if [ -n "${{ github.event.inputs.version }}" ]; then
             VERSION="${{ github.event.inputs.version }}"
           else
-            # Auto-generate dari short SHA
             VERSION="v0.0.0-$(git rev-parse --short HEAD)"
           fi
           echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
@@ -54,22 +53,36 @@ jobs:
         run: |
           docker compose run --rm build
         env:
-          WASM_VERSION: ${{ steps.version.outputs.VERSION }}
+          VERSION: ${{ steps.version.outputs.VERSION }}
 
       - name: Verify output exists
         run: |
           if [ ! -f "output/naskah-editor.wasm" ]; then
             echo "ERROR: naskah-editor.wasm not found in output/"
+            echo "Files found in output/:"
+            ls -lah output/ || echo "(output/ is empty or missing)"
             exit 1
           fi
           echo "Build output:"
           ls -lah output/
 
+      - name: Install AWS CLI
+        run: |
+          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+          unzip -q awscliv2.zip
+          sudo ./aws/install --update
+          aws --version
+
       - name: Upload to Cloudflare R2
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CF_R2_API_TOKEN }}
-          command: r2 object put ${{ secrets.CF_R2_BUCKET_NAME }}/wasm/${{ steps.version.outputs.VERSION }}/ --file=output/ --recursive
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+        run: |
+          aws s3 sync output/ s3://${{ secrets.CF_R2_BUCKET_NAME }}/wasm/${{ steps.version.outputs.VERSION }}/ \
+            --endpoint-url ${{ secrets.CF_R2_ENDPOINT }} \
+            --no-progress
+          echo "Upload selesai ke: ${{ secrets.CF_R2_ENDPOINT }}/${{ secrets.CF_R2_BUCKET_NAME }}/wasm/${{ steps.version.outputs.VERSION }}/"
 
       - name: Summary
         run: |

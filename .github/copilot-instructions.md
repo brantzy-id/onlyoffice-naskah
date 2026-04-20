@@ -41,8 +41,8 @@ masmutdevofficial/naskah-platform  ← TIDAK ada hubungannya dengan repo ini
 ## Git Identity untuk Repo Ini
 
 - GitHub account: `brantzy-id`
-- SSH remote: `git@github-brantzy-id:brantzy-id/onlyoffice-naskah.git`
-- SSH Host alias: `github-brantzy-id`
+- SSH remote: `git@github-brantzy:brantzy-id/onlyoffice-naskah.git`
+- SSH Host alias: `github-brantzy`
 - SSH IdentityFile: `C:/Users/pc/.ssh/id_ed25519_brantzy`
 
 Setiap perintah `git push`, `git remote add`, atau `git clone` untuk repo ini
@@ -107,6 +107,9 @@ Perintah build:
 ```bash
 # Build WASM
 docker compose run build
+
+# Build dengan versi spesifik
+VERSION=v1.0.0 docker compose run build
 
 # Hasil ada di output/
 # JANGAN commit output/ ke Git
@@ -202,7 +205,6 @@ Ini penting agar modifikasi bisa di-reapply saat upstream OnlyOffice diupdate.
 
 ```bash
 # Format commit message
-git add .
 git commit -m "feat(hooks): add postMessage event emitter for editor:ready and document:changed"
 
 # Format: tipe(kategori): deskripsi singkat
@@ -242,10 +244,10 @@ Langkah:
 
 Secrets yang dibutuhkan di GitHub repo settings:
 ```
-CF_R2_ACCESS_KEY_ID
-CF_R2_SECRET_ACCESS_KEY
-CF_R2_BUCKET_NAME
-CF_R2_ENDPOINT
+CF_R2_ACCESS_KEY_ID       ← R2 Access Key ID
+CF_R2_SECRET_ACCESS_KEY   ← R2 Secret Access Key
+CF_R2_BUCKET_NAME         ← nama bucket R2
+CF_R2_ENDPOINT            ← https://<account_id>.r2.cloudflarestorage.com
 ```
 
 ---
