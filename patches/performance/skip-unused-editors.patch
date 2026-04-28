@@ -1,0 +1,17 @@
+﻿diff --git a/build/Gruntfile.js b/build/Gruntfile.js
+index 044fa02213..7f3f4155e6 100644
+--- a/build/Gruntfile.js
++++ b/build/Gruntfile.js
+@@ -885,4 +885,12 @@ module.exports = function(grunt) {
+                                    'deploy-presentationeditor-component',
+                                    'deploy-pdfeditor-component',
+                                    'deploy-visioeditor-component']);
++
++    // Naskah Platform: build document, spreadsheet, presentation, and pdf editors.
++    // Skips visioeditor only, as it is not used by the platform.
++    grunt.registerTask('deploy-naskah', ['deploy-common-component',
++                                         'deploy-documenteditor-component',
++                                         'deploy-spreadsheeteditor-component',
++                                         'deploy-presentationeditor-component',
++                                         'deploy-pdfeditor-component']);
+ };

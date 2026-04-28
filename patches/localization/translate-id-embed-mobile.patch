@@ -1,0 +1,636 @@
+﻿diff --git a/apps/documenteditor/embed/locale/id.json b/apps/documenteditor/embed/locale/id.json
+index 0eae12fb7a..6b6810fb5d 100644
+--- a/apps/documenteditor/embed/locale/id.json
++++ b/apps/documenteditor/embed/locale/id.json
+@@ -64,5 +64,16 @@
+   "DE.ApplicationView.txtFullScreen": "Layar penuh",
+   "DE.ApplicationView.txtPrint": "Cetak",
+   "DE.ApplicationView.txtSearch": "Cari",
+-  "DE.ApplicationView.txtShare": "Bagikan"
++  "DE.ApplicationView.txtShare": "Bagikan",
++  "DE.ApplicationController.errorCopyDisabled": "For security reasons, the contents of this document cannot be copied.",
++  "DE.ApplicationController.errorFileNotAssembled": "This file is opened from a server backup copy and is not saved to storage.<br>Use the 'Save as...' option to save it to a drive.",
++  "DE.ApplicationController.errorForcedViewMode": "This file is opened in view mode.<br>The file is locked for editing or your access rights do not allow editing.",
++  "DE.ApplicationController.textCancel": "Cancel",
++  "DE.ApplicationController.textOk": "OK",
++  "DE.ApplicationController.txtNo": "No",
++  "DE.ApplicationController.txtOpenWarning": "Clicking this link can be harmful to your device and data. To protect you computer, click only those links from trusted sources. This location may be unsafe:<br>%1<br>Are you sure you want to continue?",
++  "DE.ApplicationController.txtSecurityWarningLink": "This document is trying to connect to %1.<br>If you trust this site, press \"OK\" while holding down the Ctrl key.",
++  "DE.ApplicationController.txtSecurityWarningLinkOk": "This document is trying to connect to %1.<br>If you trust this site, press \"OK\".",
++  "DE.ApplicationController.txtSecurityWarningOpenFile": "This document is trying to open file dialog, press \"OK\" to open.",
++  "DE.ApplicationController.txtYes": "Yes"
+ }
+\ No newline at end of file
+diff --git a/apps/documenteditor/forms/locale/id.json b/apps/documenteditor/forms/locale/id.json
+index 3cf95548ce..6a4f328db1 100644
+--- a/apps/documenteditor/forms/locale/id.json
++++ b/apps/documenteditor/forms/locale/id.json
+@@ -194,5 +194,21 @@
+   "DE.Views.ApplicationView.txtPrint": "Cetak",
+   "DE.Views.ApplicationView.txtSearch": "Cari",
+   "DE.Views.ApplicationView.txtShare": "Bagikan",
+-  "DE.Views.ApplicationView.txtTheme": "Tema interface"
++  "DE.Views.ApplicationView.txtTheme": "Tema interface",
++  "Common.UI.SynchronizeTip.textNew": "New",
++  "Common.UI.Themes.txtThemeModernDark": "Modern Dark",
++  "Common.UI.Themes.txtThemeModernLight": "Modern Light",
++  "DE.Controllers.ApplicationController.criticalErrorExtText": "Press \"OK\" to return to document list.",
++  "DE.Controllers.ApplicationController.criticalErrorExtTextClose": "Press \"OK\" to close the editor.",
++  "DE.Controllers.ApplicationController.errorCopyDisabled": "For security reasons, the contents of this document cannot be copied.",
++  "DE.Controllers.ApplicationController.errorFileNotAssembled": "This file is opened from a server backup copy and is not saved to storage.<br>Use the 'Save as...' option to save it to a drive.",
++  "DE.Controllers.ApplicationController.errorForcedViewMode": "This file is opened in view mode.<br>The file is locked for editing or your access rights do not allow editing.",
++  "DE.Controllers.ApplicationController.textContinue": "Continue",
++  "DE.Controllers.ApplicationController.tipLicenseExceeded": "The document is open in read-only mode as the maximum number of simultaneous connections allowed by license has been reached.<br><br>Please try again later or contact the document owner if you need editing access.",
++  "DE.Controllers.ApplicationController.tipLicenseUsersExceeded": "The document is open in read-only mode as the maximum number of users allowed to edit documents by license has been reached.<br><br>Please try again later or contact the document owner if you need editing access.",
++  "DE.Controllers.ApplicationController.titleReadOnly": "Read-Only Mode",
++  "DE.Controllers.ApplicationController.txtSignedForm": "This document has been signed and cannot be edited.",
++  "DE.Controllers.ApplicationController.txtWarnUrl": "Clicking this link can be harmful to your device and data. To protect you computer, click only those links from trusted sources. This location may be unsafe:<br><br>{0}<br><br>Are you sure you want to continue?",
++  "DE.Controllers.ApplicationController.warnStartFilling": "Form filling is in progress.<br>File editing is not currently available.",
++  "DE.Views.ApplicationView.textMultiplePages": "Multiple pages"
+ }
+\ No newline at end of file
+diff --git a/apps/documenteditor/mobile/locale/id.json b/apps/documenteditor/mobile/locale/id.json
+index 7584078c37..85951e1d1b 100644
+--- a/apps/documenteditor/mobile/locale/id.json
++++ b/apps/documenteditor/mobile/locale/id.json
+@@ -66,7 +66,8 @@
+     "textTableSize": "Ukuran Tabel",
+     "textWithBlueLinks": "Dengan Tautan Warna Biru",
+     "textWithPageNumbers": "Dengan Nomor Halaman",
+-    "txtNotUrl": "Ruas ini harus berupa sebuah URL dalam format ΓÇ£http://www.contoh.comΓÇ¥"
++    "txtNotUrl": "Ruas ini harus berupa sebuah URL dalam format ΓÇ£http://www.contoh.comΓÇ¥",
++    "textRemovePicture": "Remove picture"
+   },
+   "Common": {
+     "Collaboration": {
+@@ -415,7 +416,17 @@
+     "textWe": "Rab",
+     "textWrap": "Wrap",
+     "textWrappingStyle": "Gaya Pembungkusan",
+-    "textYourOption": "Opsi Anda"
++    "textYourOption": "Opsi Anda",
++    "textBaseline": "Baseline",
++    "textCapitalization": "Capitalization",
++    "textCellOptions": "Cell options",
++    "textCellSize": "Rows & columns size",
++    "textLtrTextDirection": "Left-to-right",
++    "textRtlTextDirection": "Right-to-left",
++    "textTextDirection": "Text Direction",
++    "textWrapText": "Wrap Text",
++    "txtHeight": "Height",
++    "txtWidth": "Width"
+   },
+   "Error": {
+     "convertationTimeoutText": "Waktu konversi habis.",
+@@ -479,7 +490,11 @@
+     "uploadDocSizeMessage": "Batas ukuran maksimum dokumen terlampaui.",
+     "uploadImageExtMessage": "Format gambar tidak dikenal.",
+     "uploadImageFileCountMessage": "Tidak ada gambar yang diunggah.",
+-    "uploadImageSizeMessage": "Melebihi ukuran maksimal file. Ukuran maksimum adalah 25 MB."
++    "uploadImageSizeMessage": "Melebihi ukuran maksimal file. Ukuran maksimum adalah 25 MB.",
++    "criticalErrorExtTextClose": "Press 'OK' to close the editor.",
++    "errorCopyDisabled": "For security reasons, the contents of this document cannot be copied.",
++    "errorFileNotAssembled": "This file is opened from a server backup copy and is not saved to storage.<br>Use the 'Save as...' option to save it to a drive.",
++    "errorForcedViewMode": "This file is opened in view mode.<br>The file is locked for editing or your access rights do not allow editing."
+   },
+   "LongActions": {
+     "applyChangesTextText": "Memuat data...",
+@@ -664,7 +679,11 @@
+     "warnLicenseLimitedRenewed": "Lisensi perlu diperbaharui. Anda memiliki akses terbatas untuk edit dokumen.<br>Silakan hubungi admin Anda untuk mendapatkan akses penuh",
+     "warnNoLicense": "Anda sudah mencapai batas untuk koneksi bersamaan ke %1 editor. Dokumen ini akan dibuka untuk dilihat saja. Hubungi %1 tim sales untuk syarat personal upgrade.",
+     "warnNoLicenseUsers": "Anda sudah mencapai batas user untuk %1 editor. Hubungi %1 tim sales untuk syarat personal upgrade.",
+-    "warnProcessRightsChange": "Anda tidak memiliki izin edit file ini."
++    "warnProcessRightsChange": "Anda tidak memiliki izin edit file ini.",
++    "tipLicenseExceeded": "The document is open in read-only mode as the maximum number of simultaneous connections allowed by license has been reached.<br><br>Please try again later or contact the document owner if you need editing access.",
++    "tipLicenseUsersExceeded": "The document is open in read-only mode as the maximum number of users allowed to edit documents by license has been reached.<br><br>Please try again later or contact the document owner if you need editing access.",
++    "titleReadOnly": "Read-Only Mode",
++    "txtSignedForm": "This document has been signed and cannot be edited."
+   },
+   "Settings": {
+     "advDRMOptions": "File yang Diproteksi",
+@@ -804,7 +823,9 @@
+     "txtDownloadTxt": "Download TXT",
+     "txtIncorrectPwd": "Password salah",
+     "txtOk": "OK",
+-    "txtProtected": "Jika Anda memasukkan password dan membuka file, password file saat ini akan di reset."
++    "txtProtected": "Jika Anda memasukkan password dan membuka file, password file saat ini akan di reset.",
++    "textDrawing": "Drawing",
++    "textHyphenation": "Hyphenation"
+   },
+   "Toolbar": {
+     "btnRestartNow": "Restart sekarang",
+diff --git a/apps/presentationeditor/embed/locale/id.json b/apps/presentationeditor/embed/locale/id.json
+index 14d7167b57..4b0d86e932 100644
+--- a/apps/presentationeditor/embed/locale/id.json
++++ b/apps/presentationeditor/embed/locale/id.json
+@@ -50,5 +50,12 @@
+   "PE.ApplicationView.txtFullScreen": "Layar penuh",
+   "PE.ApplicationView.txtPrint": "Cetak",
+   "PE.ApplicationView.txtSearch": "Cari",
+-  "PE.ApplicationView.txtShare": "Bagikan"
++  "PE.ApplicationView.txtShare": "Bagikan",
++  "PE.ApplicationController.errorCopyDisabled": "For security reasons, the contents of this document cannot be copied.",
++  "PE.ApplicationController.errorFileNotAssembled": "This file is opened from a server backup copy and is not saved to storage.<br>Use the 'Save as...' option to save it to a drive.",
++  "PE.ApplicationController.errorForcedViewMode": "This file is opened in view mode.<br>The file is locked for editing or your access rights do not allow editing.",
++  "PE.ApplicationController.txtNo": "No",
++  "PE.ApplicationController.txtOpenWarning": "Clicking this link can be harmful to your device and data. To protect you computer, click only those links from trusted sources. This location may be unsafe:<br>%1<br>Are you sure you want to continue?",
++  "PE.ApplicationController.txtPressLink": "Click the link to open it",
++  "PE.ApplicationController.txtYes": "Yes"
+ }
+\ No newline at end of file
+diff --git a/apps/presentationeditor/mobile/locale/id.json b/apps/presentationeditor/mobile/locale/id.json
+index 9def70e64a..00ab43fbc9 100644
+--- a/apps/presentationeditor/mobile/locale/id.json
++++ b/apps/presentationeditor/mobile/locale/id.json
+@@ -83,7 +83,8 @@
+     "textDoNotShowAgain": "Jangan tampilkan lagi",
+     "textOk": "OK",
+     "textRows": "Baris",
+-    "txtWarnUrl": "Mengklik tautan ini dapat membahayakan perangkat dan data Anda.<br>Apakah Anda yakin untuk melanjutkan?"
++    "txtWarnUrl": "Mengklik tautan ini dapat membahayakan perangkat dan data Anda.<br>Apakah Anda yakin untuk melanjutkan?",
++    "menuDuplicate": "Duplicate"
+   },
+   "Controller": {
+     "Main": {
+@@ -177,13 +178,17 @@
+       "warnLicenseLimitedRenewed": "Lisensi perlu diperbaharui. Anda memiliki akses terbatas untuk edit dokumen.<br>Silakan hubungi admin Anda untuk mendapatkan akses penuh",
+       "warnNoLicense": "Anda sudah mencapai batas untuk koneksi bersamaan ke %1 editor. Dokumen ini akan dibuka untuk dilihat saja. Hubungi %1 tim sales untuk syarat personal upgrade.",
+       "warnNoLicenseUsers": "Anda sudah mencapai batas user untuk %1 editor. Hubungi %1 tim sales untuk syarat personal upgrade.",
+-      "warnProcessRightsChange": "Anda tidak memiliki izin edit file ini."
++      "warnProcessRightsChange": "Anda tidak memiliki izin edit file ini.",
++      "tipLicenseExceeded": "The document is open in read-only mode as the maximum number of simultaneous connections allowed by license has been reached.<br><br>Please try again later or contact the document owner if you need editing access.",
++      "tipLicenseUsersExceeded": "The document is open in read-only mode as the maximum number of users allowed to edit documents by license has been reached.<br><br>Please try again later or contact the document owner if you need editing access.",
++      "titleReadOnly": "Read-Only Mode"
+     }
+   },
+   "Draw": {
+     "textColor": "Warna",
+     "textCustomColor": "Warna ubahan",
+-    "textLineSize": "Ukuran garis"
++    "textLineSize": "Ukuran garis",
++    "textOpacity": "Opacity"
+   },
+   "Error": {
+     "convertationTimeoutText": "Waktu konversi habis.",
+@@ -235,7 +240,11 @@
+     "unknownErrorText": "Kesalahan tidak diketahui.",
+     "uploadImageExtMessage": "Format gambar tidak dikenal.",
+     "uploadImageFileCountMessage": "Tidak ada gambar yang diunggah.",
+-    "uploadImageSizeMessage": "Melebihi ukuran maksimal file. Ukuran maksimum adalah 25 MB."
++    "uploadImageSizeMessage": "Melebihi ukuran maksimal file. Ukuran maksimum adalah 25 MB.",
++    "criticalErrorExtTextClose": "Press 'OK' to close the editor.",
++    "errorCopyDisabled": "For security reasons, the contents of this document cannot be copied.",
++    "errorFileNotAssembled": "This file is opened from a server backup copy and is not saved to storage.<br>Use the 'Save as...' option to save it to a drive.",
++    "errorForcedViewMode": "This file is opened in view mode.<br>The file is locked for editing or your access rights do not allow editing."
+   },
+   "LongActions": {
+     "applyChangesTextText": "Memuat data...",
+@@ -324,7 +333,8 @@
+       "textSlideNumber": "Nomor Slide",
+       "textTable": "Tabel",
+       "textTableSize": "Ukuran Tabel",
+-      "txtNotUrl": "Ruas ini harus berupa sebuah URL dalam format ΓÇ£http://www.contoh.comΓÇ¥"
++      "txtNotUrl": "Ruas ini harus berupa sebuah URL dalam format ΓÇ£http://www.contoh.comΓÇ¥",
++      "textDrawing": "Drawing"
+     },
+     "Edit": {
+       "notcriticalErrorTitle": "Peringatan",
+@@ -489,7 +499,17 @@
+       "textZoom": "Pembesaran",
+       "textZoomIn": "Perbesar",
+       "textZoomOut": "Perkecil",
+-      "textZoomRotate": "Zoom dan Rotasi"
++      "textZoomRotate": "Zoom dan Rotasi",
++      "textBackground": "Background",
++      "textBaseline": "Baseline",
++      "textCapitalization": "Capitalization",
++      "textCellSize": "Cell size",
++      "textLtrTextDirection": "Left-to-right",
++      "textResetBackground": "Reset background",
++      "textRtlTextDirection": "Right-to-left",
++      "textTextDirection": "Text Direction",
++      "txtHeight": "Height",
++      "txtWidth": "Width"
+     },
+     "Settings": {
+       "mniSlideStandard": "Standard (4:3)",
+@@ -557,7 +577,8 @@
+       "textUnitOfMeasurement": "Satuan Ukuran",
+       "textUploaded": "Diunggah",
+       "textVersion": "Versi",
+-      "textVersionHistory": "Riwayat Versi"
++      "textVersionHistory": "Riwayat Versi",
++      "textLoopSlideshow": "Loop slideshow"
+     }
+   }
+ }
+\ No newline at end of file
+diff --git a/apps/spreadsheeteditor/embed/locale/id.json b/apps/spreadsheeteditor/embed/locale/id.json
+index 3e33bdd230..896404b574 100644
+--- a/apps/spreadsheeteditor/embed/locale/id.json
++++ b/apps/spreadsheeteditor/embed/locale/id.json
+@@ -50,5 +50,12 @@
+   "SSE.ApplicationView.txtFullScreen": "Layar penuh",
+   "SSE.ApplicationView.txtPrint": "Cetak",
+   "SSE.ApplicationView.txtSearch": "Cari",
+-  "SSE.ApplicationView.txtShare": "Bagikan"
++  "SSE.ApplicationView.txtShare": "Bagikan",
++  "SSE.ApplicationController.errorCopyDisabled": "For security reasons, the contents of this document cannot be copied.",
++  "SSE.ApplicationController.errorFileNotAssembled": "This file is opened from a server backup copy and is not saved to storage.<br>Use the 'Save as...' option to save it to a drive.",
++  "SSE.ApplicationController.errorForcedViewMode": "This file is opened in view mode.<br>The file is locked for editing or your access rights do not allow editing.",
++  "SSE.ApplicationController.txtNo": "No",
++  "SSE.ApplicationController.txtOpenWarning": "Clicking this link can be harmful to your device and data. To protect you computer, click only those links from trusted sources. This location may be unsafe:<br>%1<br>Are you sure you want to continue?",
++  "SSE.ApplicationController.txtPressLink": "Click the link to open it",
++  "SSE.ApplicationController.txtYes": "Yes"
+ }
+\ No newline at end of file
+diff --git a/apps/spreadsheeteditor/mobile/locale/id.json b/apps/spreadsheeteditor/mobile/locale/id.json
+index aeda426443..23763504d7 100644
+--- a/apps/spreadsheeteditor/mobile/locale/id.json
++++ b/apps/spreadsheeteditor/mobile/locale/id.json
+@@ -242,13 +242,17 @@
+       "warnLicenseLimitedRenewed": "Lisensi perlu diperbaharui. Anda memiliki akses terbatas untuk edit dokumen.<br>Silakan hubungi admin Anda untuk mendapatkan akses penuh",
+       "warnNoLicense": "Anda sudah mencapai batas untuk koneksi bersamaan ke %1 editor. Dokumen ini akan dibuka untuk dilihat saja. Hubungi %1 tim sales untuk syarat personal upgrade.",
+       "warnNoLicenseUsers": "Anda sudah mencapai batas user untuk %1 editor. Hubungi %1 tim sales untuk syarat personal upgrade.",
+-      "warnProcessRightsChange": "Anda tidak memiliki izin edit file ini."
++      "warnProcessRightsChange": "Anda tidak memiliki izin edit file ini.",
++      "tipLicenseExceeded": "The document is open in read-only mode as the maximum number of simultaneous connections allowed by license has been reached.<br><br>Please try again later or contact the document owner if you need editing access.",
++      "tipLicenseUsersExceeded": "The document is open in read-only mode as the maximum number of users allowed to edit documents by license has been reached.<br><br>Please try again later or contact the document owner if you need editing access.",
++      "titleReadOnly": "Read-Only Mode"
+     }
+   },
+   "Draw": {
+     "textColor": "Warna",
+     "textCustomColor": "Warna ubahan",
+-    "textLineSize": "Ukuran garis"
++    "textLineSize": "Ukuran garis",
++    "textOpacity": "Opacity"
+   },
+   "Error": {
+     "convertationTimeoutText": "Waktu konversi habis.",
+@@ -373,7 +377,12 @@
+     "uploadDocSizeMessage": "Batas ukuran maksimum dokumen terlampaui.",
+     "uploadImageExtMessage": "Format gambar tidak dikenal.",
+     "uploadImageFileCountMessage": "Tidak ada gambar yang diunggah.",
+-    "uploadImageSizeMessage": "Melebihi ukuran maksimal file. Ukuran maksimum adalah 25 MB."
++    "uploadImageSizeMessage": "Melebihi ukuran maksimal file. Ukuran maksimum adalah 25 MB.",
++    "criticalErrorExtTextClose": "Press 'OK' to close the editor.",
++    "errorCopyDisabled": "For security reasons, the contents of this document cannot be copied.",
++    "errorFileNotAssembled": "This file is opened from a server backup copy and is not saved to storage.<br>Use the 'Save as...' option to save it to a drive.",
++    "errorForcedViewMode": "This file is opened in view mode.<br>The file is locked for editing or your access rights do not allow editing.",
++    "errorMacroUnavailableWarning": "Cannot run the macro %1. The macro may not be available in this workbook or all macros may be disabled."
+   },
+   "LongActions": {
+     "advDRMPassword": "Kata Sandi",
+@@ -442,7 +451,9 @@
+     "textSheetName": "Nama Sheet",
+     "textTabColor": "Warna Tab",
+     "textUnhide": "Tidak Disembunyikan",
+-    "textWarnDeleteSheet": "Lembar mungkin punya data. Lanjutkan operasi?"
++    "textWarnDeleteSheet": "Lembar mungkin punya data. Lanjutkan operasi?",
++    "textContinue": "Continue",
++    "warnAddSheetCsv": "The CSV format does not support saving a multi-sheet file. Only the active sheet will be saved. To keep all sheets, please save the file in a different format."
+   },
+   "Toolbar": {
+     "btnRestartNow": "Restart sekarang",
+@@ -519,7 +530,8 @@
+       "txtNotUrl": "Ruas ini harus berupa sebuah URL dalam format ΓÇ£http://www.contoh.comΓÇ¥",
+       "txtSorting": "Sorting",
+       "txtSortSelected": "Sortir dipilih",
+-      "txtYes": "Ya"
++      "txtYes": "Ya",
++      "textDrawing": "Drawing"
+     },
+     "Edit": {
+       "notcriticalErrorTitle": "Peringatan",
+@@ -712,7 +724,22 @@
+       "textYen": "Yen",
+       "txtNotUrl": "Ruas ini harus berupa sebuah URL dalam format ΓÇ£http://www.contoh.comΓÇ¥",
+       "txtSortHigh2Low": "Sortir Tertinggi ke Terendah",
+-      "txtSortLow2High": "Sortir Terendah ke Tertinggi"
++      "txtSortLow2High": "Sortir Terendah ke Tertinggi",
++      "textAdditional": "Additional",
++      "textAdditionalFormatting": "Additional formatting",
++      "textAllCaps": "All Caps",
++      "textBaseline": "Baseline",
++      "textCapitalization": "Capitalization",
++      "textContextTextDirection": "Context",
++      "textDoubleStrikethrough": "Double Strikethrough",
++      "textLetterSpacing": "Letter spacing",
++      "textLtrTextDirection": "Left-to-right",
++      "textRtlTextDirection": "Right-to-left",
++      "textSmallCaps": "Small Caps",
++      "textStrikethrough": "Strikethrough",
++      "textSubscript": "Subscript",
++      "textSuperscript": "Superscript",
++      "textTextDirection": "Text Direction"
+     },
+     "Settings": {
+       "advCSVOptions": "Pilih Opsi CSV",
+@@ -866,7 +893,13 @@
+       "txtUk": "Ukraina",
+       "txtVi": "Vietnam",
+       "txtZh": "China",
+-      "warnDownloadAs": "Jika Anda lanjut simpan dengan format ini, semua fitur kecuali teks akan hilang.<br>Apakah Anda ingin melanjutkan?"
++      "warnDownloadAs": "Jika Anda lanjut simpan dengan format ini, semua fitur kecuali teks akan hilang.<br>Apakah Anda ingin melanjutkan?",
++      "textSheetRtl": "Sheet Right to left",
++      "txtSr": "Serbian (Latin)",
++      "txtSrcyrl": "Serbian (Cyrillic)",
++      "txtZhtw": "Chinese (Traditional)",
++      "warnDownloadCsv": "The CSV format does not support saving a multi-sheet file and all elements, except text.<br>To save only the active sheet to CSV, press OK.<br>To save the whole spreadsheet and all features, click Cancel and select another format.",
++      "warnDownloadOds": "Saving this file may result in the loss of some formulas, cell formatting, or embedded objects due to limited format support.<br>Are you sure you want to continue?"
+     }
+   }
+ }
+\ No newline at end of file
+diff --git a/apps/visioeditor/embed/locale/id.json b/apps/visioeditor/embed/locale/id.json
+index 4fe38e846c..5a8600c502 100644
+--- a/apps/visioeditor/embed/locale/id.json
++++ b/apps/visioeditor/embed/locale/id.json
+@@ -9,5 +9,54 @@
+   "VE.ApplicationController.openErrorText": "Terjadi kesalahan saat membuka berkas.",
+   "VE.ApplicationController.textAnonymous": "Anonim",
+   "VE.ApplicationController.txtClose": "Tutup",
+-  "VE.ApplicationController.txtPressLink": "Klik tautan untuk membukanya"
++  "VE.ApplicationController.txtPressLink": "Klik tautan untuk membukanya",
++  "common.view.modals.txtCopy": "Copy to clipboard",
++  "common.view.modals.txtEmbed": "Embed",
++  "common.view.modals.txtHeight": "Height",
++  "common.view.modals.txtIncorrectPwd": "Password is incorrect",
++  "common.view.modals.txtOpenFile": "Enter a password to open the file",
++  "common.view.modals.txtShare": "Share link",
++  "common.view.modals.txtTitleProtected": "Protected file",
++  "common.view.modals.txtWidth": "Width",
++  "common.view.SearchBar.textFind": "Find",
++  "VE.ApplicationController.convertationErrorText": "Conversion failed.",
++  "VE.ApplicationController.convertationTimeoutText": "Conversion timeout exceeded.",
++  "VE.ApplicationController.criticalErrorTitle": "Error",
++  "VE.ApplicationController.downloadErrorText": "Download failed.",
++  "VE.ApplicationController.downloadTextText": "Downloading document...",
++  "VE.ApplicationController.errorAccessDeny": "You are trying to perform an action you do not have rights for.<br>Please contact your Document Server administrator.",
++  "VE.ApplicationController.errorCopyDisabled": "For security reasons, the contents of this document cannot be copied.",
++  "VE.ApplicationController.errorFileNotAssembled": "This file is opened from a server backup copy and is not saved to storage.<br>Use the 'Save as...' option to save it to a drive.",
++  "VE.ApplicationController.errorForcedViewMode": "This file is opened in view mode.<br>The file is locked for editing or your access rights do not allow editing.",
++  "VE.ApplicationController.errorDefaultMessage": "Error code: %1",
++  "VE.ApplicationController.errorFilePassProtect": "The file is password protected and cannot be opened.",
++  "VE.ApplicationController.errorFileSizeExceed": "The file size exceeds the limitation set for your server.<br>Please contact your Document Server administrator for details.",
++  "VE.ApplicationController.errorLoadingFont": "Fonts are not loaded.<br>Please contact your Document Server administrator.",
++  "VE.ApplicationController.errorToken": "The document security token is not correctly formed.<br>Please contact your Document Server administrator.",
++  "VE.ApplicationController.errorTokenExpire": "The document security token has expired.<br>Please contact your Document Server administrator.",
++  "VE.ApplicationController.errorUpdateVersionOnDisconnect": "Connection has been restored, and the file version has been changed.<br>Before you can continue working, you need to download the file or copy its content to make sure nothing is lost, and then reload this page.",
++  "VE.ApplicationController.errorUserDrop": "The file cannot be accessed right now.",
++  "VE.ApplicationController.notcriticalErrorTitle": "Warning",
++  "VE.ApplicationController.scriptLoadError": "The connection is too slow, some of the components could not be loaded. Please reload the page.",
++  "VE.ApplicationController.textGuest": "Guest",
++  "VE.ApplicationController.textLoadingDocument": "Loading document",
++  "VE.ApplicationController.textOf": "of",
++  "VE.ApplicationController.titleLicenseExp": "License expired",
++  "VE.ApplicationController.titleLicenseNotActive": "License not active",
++  "VE.ApplicationController.txtNo": "No",
++  "VE.ApplicationController.txtOpenWarning": "Clicking this link can be harmful to your device and data. To protect you computer, click only those links from trusted sources. This location may be unsafe:<br>%1<br>Are you sure you want to continue?",
++  "VE.ApplicationController.txtPage": "Page",
++  "VE.ApplicationController.txtYes": "Yes",
++  "VE.ApplicationController.unknownErrorText": "Unknown error.",
++  "VE.ApplicationController.unsupportedBrowserErrorText": "Your browser is not supported.",
++  "VE.ApplicationController.waitText": "Please, wait...",
++  "VE.ApplicationController.warnLicenseBefore": "License not active. Please contact your administrator.",
++  "VE.ApplicationController.warnLicenseExp": "Your license has expired. Please update your license and refresh the page.",
++  "VE.ApplicationView.txtDownload": "Download",
++  "VE.ApplicationView.txtEmbed": "Embed",
++  "VE.ApplicationView.txtFileLocation": "Open file location",
++  "VE.ApplicationView.txtFullScreen": "Full screen",
++  "VE.ApplicationView.txtPrint": "Print",
++  "VE.ApplicationView.txtSearch": "Find",
++  "VE.ApplicationView.txtShare": "Share"
+ }
+\ No newline at end of file
+diff --git a/apps/visioeditor/mobile/locale/id.json b/apps/visioeditor/mobile/locale/id.json
+index 81d4ea9e8e..f6207a3465 100644
+--- a/apps/visioeditor/mobile/locale/id.json
++++ b/apps/visioeditor/mobile/locale/id.json
+@@ -1,20 +1,220 @@
+ {
+   "About": {
+     "textAbout": "Tentang",
+-    "textAddress": "Alamat"
++    "textAddress": "Alamat",
++    "textBack": "Back",
++    "textEditor": "Diagram Viewer",
++    "textEmail": "Email",
++    "textPoweredBy": "Powered By",
++    "textTel": "Tel",
++    "textVersion": "Version"
+   },
+   "Controller": {
+     "Main": {
+-      "warnLicenseAnonymous": "Akses ditolak untuk pengguna anonim.<br>Dokumen ini akan dibuka hanya untuk dilihat."
++      "warnLicenseAnonymous": "Akses ditolak untuk pengguna anonim.<br>Dokumen ini akan dibuka hanya untuk dilihat.",
++      "advDRMOptions": "Protected File",
++      "advDRMPassword": "Password",
++      "closeButtonText": "Close File",
++      "criticalErrorTitle": "Error",
++      "errorAccessDeny": "You are trying to perform an action you do not have rights for.<br>Please, contact your admin.",
++      "errorOpensource": "Using the free Community version, you can open documents for viewing only. To access mobile web editors, a commercial license is required.",
++      "errorServerVersion": "The editor version has been updated. The page will be reloaded to apply the changes.",
++      "errorUpdateVersion": "The file version has been changed. The page will be reloaded.",
++      "leavePageText": "You have unsaved changes in this document. Click 'Stay on this Page' to wait for autosave. Click 'Leave this Page' to discard all the unsaved changes.",
++      "notcriticalErrorTitle": "Warning",
++      "textAnonymous": "Anonymous",
++      "textBuyNow": "Visit website",
++      "textClose": "Close",
++      "textContactUs": "Contact sales",
++      "textCustomLoader": "Sorry, you are not entitled to change the loader. Please, contact our sales department to get a quote.",
++      "textGuest": "Guest",
++      "textNo": "No",
++      "textNoLicenseTitle": "License limit reached",
++      "textOk": "Ok",
++      "textOpenFile": "Enter a password to open the file",
++      "textPaidFeature": "Paid feature",
++      "textYes": "Yes",
++      "tipLicenseExceeded": "The document is open in read-only mode as the maximum number of simultaneous connections allowed by license has been reached.<br><br>Please try again later or contact the document owner if you need editing access.",
++      "tipLicenseUsersExceeded": "The document is open in read-only mode as the maximum number of users allowed to edit documents by license has been reached.<br><br>Please try again later or contact the document owner if you need editing access.",
++      "titleLicenseExp": "License expired",
++      "titleLicenseNotActive": "License not active",
++      "titleReadOnly": "Read-Only Mode",
++      "titleServerVersion": "Editor updated",
++      "titleUpdateVersion": "Version changed",
++      "txtIncorrectPwd": "Password is incorrect",
++      "warnLicenseBefore": "License not active.<br>Please contact your administrator.",
++      "warnLicenseExp": "Your license has expired. Please, update your license and refresh the page.",
++      "warnLicenseLimitedNoAccess": "License expired. You have no access to document editing functionality. Please, contact your administrator.",
++      "warnLicenseLimitedRenewed": "License needs to be renewed. You have limited access to document editing functionality.<br>Please contact your administrator to get full access",
++      "warnNoLicense": "You've reached the limit for simultaneous connections to %1 editors. This document will be opened for viewing only. Contact %1 sales team for personal upgrade terms.",
++      "warnNoLicenseUsers": "You've reached the user limit for %1 editors. Contact %1 sales team for personal upgrade terms.",
++      "warnProcessRightsChange": "You don't have permission to edit the file."
+     }
+   },
+   "Error": {
+-    "openErrorText": "Terjadi kesalahan ketika membuka berkas"
++    "openErrorText": "Terjadi kesalahan ketika membuka berkas",
++    "convertationTimeoutText": "Conversion timeout exceeded.",
++    "criticalErrorExtText": "Press 'OK' to go back to the document list.",
++    "criticalErrorExtTextClose": "Press 'OK' to close the editor.",
++    "criticalErrorTitle": "Error",
++    "downloadErrorText": "Download failed.",
++    "errorAccessDeny": "You are trying to perform an action you do not have rights for.<br>Please contact your admin.",
++    "errorBadImageUrl": "Image URL is incorrect",
++    "errorConnectToServer": "Can't save this doc. Check your connection settings or contact your admin.<br>When you click the 'OK' button, you will be prompted to download the document.",
++    "errorCopyDisabled": "For security reasons, the contents of this document cannot be copied.",
++    "errorFileNotAssembled": "This file is opened from a server backup copy and is not saved to storage.<br>Use the 'Save as...' option to save it to a drive.",
++    "errorForcedViewMode": "This file is opened in view mode.<br>The file is locked for editing or your access rights do not allow editing.",
++    "errorDatabaseConnection": "External error.<br>Database connection error. Please, contact support.",
++    "errorDataEncrypted": "Encrypted changes have been received, they cannot be deciphered.",
++    "errorDataRange": "Incorrect data range.",
++    "errorDefaultMessage": "Error code: %1",
++    "errorDirectUrl": "Please verify the link to the document.<br>This link must be a direct link to the file for downloading.",
++    "errorEditingDownloadas": "An error occurred during the work with the document.<br>Use the 'Download' option to save the file backup copy locally.",
++    "errorEmailClient": "No email client could be found",
++    "errorFilePassProtect": "The file is password protected and could not be opened.",
++    "errorFileSizeExceed": "The file size exceeds your server limitation.<br>Please, contact your admin.",
++    "errorForceSave": "An error occurred while saving the file. Please use the 'Download as' option to save the file to your computer hard drive or try again later.",
++    "errorInconsistentExt": "An error has occurred while opening the file.<br>The file content does not match the file extension.",
++    "errorInconsistentExtDocx": "An error has occurred while opening the file.<br>The file content corresponds to text documents (e.g. docx), but the file has the inconsistent extension: %1.",
++    "errorInconsistentExtPdf": "An error has occurred while opening the file.<br>The file content corresponds to one of the following formats: pdf/djvu/xps/oxps, but the file has the inconsistent extension: %1.",
++    "errorInconsistentExtPptx": "An error has occurred while opening the file.<br>The file content corresponds to presentations (e.g. pptx), but the file has the inconsistent extension: %1.",
++    "errorInconsistentExtXlsx": "An error has occurred while opening the file.<br>The file content corresponds to spreadsheets (e.g. xlsx), but the file has the inconsistent extension: %1.",
++    "errorKeyEncrypt": "Unknown key descriptor",
++    "errorKeyExpire": "Key descriptor expired",
++    "errorLoadingFont": "Fonts are not loaded.<br>Please contact your Document Server administrator.",
++    "errorSaveWatermark": "This file contains a watermark image linked to another domain.<br>To make it visible in PDF, update the watermark image so it links from the same domain as your document, or upload it from your computer.",
++    "errorSessionAbsolute": "The document editing session has expired. Please, reload the page.",
++    "errorSessionIdle": "The document has not been edited for quite a long time. Please, reload the page.",
++    "errorSessionToken": "The connection to the server has been interrupted. Please, reload the page.",
++    "errorSetPassword": "Password could not be set.",
++    "errorToken": "The document security token is not correctly formed.<br>Please contact your Document Server administrator.",
++    "errorTokenExpire": "The document security token has expired.<br>Please contact your Document Server administrator.",
++    "errorUpdateVersionOnDisconnect": "Connection has been restored, and the file version has been changed.<br>Before you can continue working, download the file or copy its content to make sure nothing is lost, and then reload this page.",
++    "errorUserDrop": "The file cannot be accessed right now.",
++    "errorUsersExceed": "The number of users allowed by the pricing plan was exceeded",
++    "errorViewerDisconnect": "Connection is lost. You can still view the document,<br>but you won't be able to download or print it until the connection is restored and the page is reloaded.",
++    "notcriticalErrorTitle": "Warning",
++    "saveErrorText": "An error has occurred while saving the file",
++    "scriptLoadError": "The connection is too slow, some of the components could not be loaded. Please, reload the page.",
++    "textOk": "OK",
++    "unknownErrorText": "Unknown error.",
++    "uploadImageExtMessage": "Unknown image format.",
++    "uploadImageFileCountMessage": "No images uploaded.",
++    "uploadImageSizeMessage": "The image is too big. The maximum size is 25 MB."
+   },
+   "View": {
+     "Settings": {
+       "textAbout": "Tentang",
+-      "textAddress": "alamat:"
++      "textAddress": "alamat:",
++      "notcriticalErrorTitle": "Warning",
++      "textApplication": "Application",
++      "textApplicationSettings": "Application Settings",
++      "textAuthor": "Author",
++      "textBack": "Back",
++      "textClose": "Close",
++      "textCollaboration": "Collaboration",
++      "textComment": "Comment",
++      "textCreated": "Created",
++      "textDark": "Dark",
++      "textDarkTheme": "Dark Theme",
++      "textDone": "Done",
++      "textDownload": "Download",
++      "textDownloadAs": "Download As...",
++      "textEmail": "email:",
++      "textFeedback": "Feedback & Support",
++      "textHelp": "Help",
++      "textLastModified": "Last Modified",
++      "textLastModifiedBy": "Last Modified By",
++      "textLight": "Light",
++      "textLoading": "Loading...",
++      "textLocation": "Location",
++      "textOk": "Ok",
++      "textOwner": "Owner",
++      "textPoweredBy": "Powered By",
++      "textPrint": "Print",
++      "textRestartApplication": "Please restart the application for the changes to take effect",
++      "textSameAsSystem": "Same As System",
++      "textSearch": "Find",
++      "textSettings": "Settings",
++      "textSubject": "Subject",
++      "textTel": "tel:",
++      "textTheme": "Theme",
++      "textTitle": "Title",
++      "textUploaded": "Uploaded",
++      "textVersion": "Version",
++      "textVisioInfo": "Diagram Viewer Info",
++      "textVisioSettings": "Diagram Viewer Settings",
++      "textVisioTitle": "Diagram Viewer Title"
++    },
++    "Edit": {
++      "notcriticalErrorTitle": "Warning",
++      "textCancel": "Cancel",
++      "textInvalidName": "The file name cannot contain any of the following characters: ",
++      "textOk": "Ok"
+     }
++  },
++  "Common": {
++    "Collaboration": {
++      "notcriticalErrorTitle": "Warning",
++      "textBack": "Back",
++      "textCancel": "Cancel",
++      "textCollaboration": "Collaboration",
++      "textEditUser": "Users who are editing the file:",
++      "textOk": "Ok",
++      "textSharingSettings": "Sharing Settings",
++      "textUsers": "Users"
++    },
++    "Themes": {
++      "dark": "Dark",
++      "light": "Light",
++      "system": "Same as system",
++      "textTheme": "Theme"
++    }
++  },
++  "ContextMenu": {
++    "menuCancel": "Cancel",
++    "textOk": "Ok",
++    "txtWarnUrl": "Clicking this link can be harmful to your device and data. This location may be unsafe:<br>{0}<br>Are you sure you want to continue?"
++  },
++  "LongActions": {
++    "applyChangesTextText": "Loading data...",
++    "applyChangesTitleText": "Loading Data",
++    "downloadTextText": "Downloading document...",
++    "downloadTitleText": "Downloading Document",
++    "loadFontsTextText": "Loading data...",
++    "loadFontsTitleText": "Loading Data",
++    "loadFontTextText": "Loading data...",
++    "loadFontTitleText": "Loading Data",
++    "loadImagesTextText": "Loading images...",
++    "loadImagesTitleText": "Loading Images",
++    "loadImageTextText": "Loading image...",
++    "loadImageTitleText": "Loading Image",
++    "loadingDocumentTextText": "Loading document...",
++    "loadingDocumentTitleText": "Loading",
++    "loadThemeTextText": "Loading theme...",
++    "loadThemeTitleText": "Loading Theme",
++    "openTextText": "Opening document...",
++    "openTitleText": "Opening Document",
++    "printTextText": "Printing document...",
++    "printTitleText": "Printing Document",
++    "savePreparingText": "Preparing to save",
++    "savePreparingTitle": "Preparing to save. Please wait...",
++    "saveTextText": "Saving document...",
++    "saveTitleText": "Saving Document",
++    "textLoadingDocument": "Loading",
++    "txtEditingMode": "Set editing mode...",
++    "uploadImageTextText": "Uploading image...",
++    "uploadImageTitleText": "Uploading Image",
++    "waitText": "Please, wait..."
++  },
++  "Toolbar": {
++    "btnRestartNow": "Restart now",
++    "dlgLeaveMsgText": "You have unsaved changes in this document. Click 'Stay on this Page' to wait for autosave. Click 'Leave this Page' to discard all the unsaved changes.",
++    "dlgLeaveTitleText": "You leave the application",
++    "leaveButtonText": "Leave this page",
++    "stayButtonText": "Stay on this Page",
++    "textEnterNewFileName": "Enter a new file name",
++    "textRenameFile": "Rename File",
++    "textSwitchToDesktop": "Switch to Desktop"
+   }
+ }
+\ No newline at end of file

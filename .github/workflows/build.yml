@@ -57,14 +57,21 @@ jobs:
 
       - name: Verify output exists
         run: |
-          if [ ! -f "output/naskah-editor.wasm" ]; then
-            echo "ERROR: naskah-editor.wasm not found in output/"
-            echo "Files found in output/:"
-            ls -lah output/ || echo "(output/ is empty or missing)"
+          if [ ! -d "output/web-apps/apps" ]; then
+            echo "ERROR: output/web-apps/apps/ tidak ditemukan"
+            echo "Isi output/:"
+            ls -lah output/ 2>/dev/null || echo "(output/ kosong atau tidak ada)"
             exit 1
           fi
           echo "Build output:"
-          ls -lah output/
+          ls -lah output/web-apps/apps/
+
+      - name: Inject CACHE_VERSION ke sw.js
+        run: |
+          VERSION="${{ steps.version.outputs.VERSION }}"
+          # Ganti placeholder __CACHE_VERSION dengan versi aktual
+          sed -i "s|self.__CACHE_VERSION || 'naskah-v1'|'naskah-${VERSION}'|g" output/sw.js
+          echo "sw.js cache version: naskah-${VERSION}"
 
       - name: Install AWS CLI
         run: |

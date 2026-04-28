@@ -1,0 +1,469 @@
+﻿diff --git a/apps/common/NaskahBridge.js b/apps/common/NaskahBridge.js
+new file mode 100644
+index 0000000000..2ff0e15954
+--- /dev/null
++++ b/apps/common/NaskahBridge.js
+@@ -0,0 +1,256 @@
++/*
++ * (c) Copyright Ascensio System SIA 2010-2024
++ *
++ * This program is a free software product. You can redistribute it and/or
++ * modify it under the terms of the GNU Affero General Public License (AGPL)
++ * version 3 as published by the Free Software Foundation. In accordance with
++ * Section 7(a) of the GNU AGPL its Section 15 shall be amended to the effect
++ * that Ascensio System SIA expressly excludes the warranty of non-infringement
++ * of any third-party rights.
++ *
++ * This program is distributed WITHOUT ANY WARRANTY; without even the implied
++ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR  PURPOSE. For
++ * details, see the GNU AGPL at: http://www.gnu.org/licenses/agpl-3.0.html
++ *
++ * You can contact Ascensio System SIA at 20A-6 Ernesta Birznieka-Upish
++ * street, Riga, Latvia, EU, LV-1050.
++ *
++ * The  interactive user interfaces in modified source and object code versions
++ * of the Program must display Appropriate Legal Notices, as required under
++ * Section 5 of the GNU AGPL version 3.
++ *
++ * Pursuant to Section 7(b) of the License you must retain the original Product
++ * logo when distributing the program. Pursuant to Section 7(e) we decline to
++ * grant you any rights under trademark law for use of our trademarks.
++ *
++ * All the Product's GUI elements, including illustrations and icon sets, as
++ * well as technical writing content are licensed under the terms of the
++ * Creative Commons Attribution-ShareAlike 4.0 International. See the License
++ * terms at http://creativecommons.org/licenses/by-sa/4.0/legalcode
++ *
++ */
++
++/**
++ * NaskahBridge.js
++ *
++ * Naskah Platform ΓÇö postMessage bridge between the OnlyOffice WASM editor
++ * (iframe) and the Naskah parent window.
++ *
++ * EVENT EMITTER (editor ΓåÆ parent):
++ *   { type: 'naskah:editor:ready',       data: { editorType } }
++ *   { type: 'naskah:document:changed',   data: { isModified } }
++ *   { type: 'naskah:document:saved',     data: {} }
++ *   { type: 'naskah:selection:changed',  data: { info } }
++ *   { type: 'naskah:wordcount:updated',  data: { words, paragraphs, pages } }
++ *   { type: 'naskah:error:occurred',     data: { code, description } }
++ *
++ * COMMAND HANDLER (parent ΓåÆ editor):
++ *   postMessage({ type: 'naskah:save' })
++ *   postMessage({ type: 'naskah:getContent',        id: <requestId> })
++ *   postMessage({ type: 'naskah:open',              data: { url, token, ... } })
++ *   postMessage({ type: 'naskah:setTheme',          data: { theme } })
++ *   postMessage({ type: 'naskah:setLocale',         data: { lang } })
++ *   postMessage({ type: 'naskah:enableFocusMode' })
++ *   postMessage({ type: 'naskah:disableFocusMode' })
++ *   postMessage({ type: 'naskah:insertText',        data: { text } })
++ *
++ * SECURITY: Only messages from window.parentOrigin or parent window are
++ * processed. The origin check mirrors Gateway.js logic.
++ */
++
++if (window.Common === undefined)
++    window.Common = {};
++
++window.NaskahBridge = (function () {
++
++    var _api = null;
++    var _appOptions = null;
++    var _initialized = false;
++
++    // ΓöÇΓöÇΓöÇ Helpers ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
++
++    /**
++     * Send a typed postMessage event to the parent window.
++     * Format is intentionally different from OnlyOffice's own events
++     * so the Naskah platform can distinguish them.
++     */
++    var _emit = function (type, data) {
++        if (!window.parent || window.parent === window) return;
++        try {
++            window.parent.postMessage(
++                JSON.stringify({ source: 'naskah-editor', type: type, data: data || {} }),
++                '*'
++            );
++        } catch (e) {
++            /* ignore serialization errors */
++        }
++    };
++
++    /**
++     * Check if an incoming postMessage is from a trusted origin.
++     * Mirrors Gateway.js origin validation.
++     */
++    var _isTrustedOrigin = function (origin) {
++        if (!origin) return false;
++        if (window.parentOrigin && origin === window.parentOrigin) return true;
++        if (origin === window.location.origin) return true;
++        if (origin === 'null' && (window.parentOrigin === 'file://' || window.location.origin === 'file://')) return true;
++        return false;
++    };
++
++    // ΓöÇΓöÇΓöÇ Event emitter setup (api-independent) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
++
++    // editor:ready ΓÇö fires when app fully loaded and document is ready
++    if (window.Common && Common.NotificationCenter) {
++        Common.NotificationCenter.on('app:ready', function (opts) {
++            _appOptions = opts;
++            var editorType = 'unknown';
++            if (window.DE) editorType = 'documenteditor';
++            else if (window.SSE) editorType = 'spreadsheeteditor';
++            else if (window.PE) editorType = 'presentationeditor';
++            else if (window.PDFE) editorType = 'pdfeditor';
++            _emit('naskah:editor:ready', { editorType: editorType });
++        });
++    }
++
++    // document:changed ΓÇö intercept Gateway.setDocumentModified
++    if (window.Common && Common.Gateway && Common.Gateway.setDocumentModified) {
++        var _origSetDocumentModified = Common.Gateway.setDocumentModified.bind(Common.Gateway);
++        Common.Gateway.setDocumentModified = function (modified) {
++            _origSetDocumentModified(modified);
++            _emit('naskah:document:changed', { isModified: !!modified });
++        };
++    }
++
++    // error:occurred ΓÇö intercept Gateway.reportError
++    if (window.Common && Common.Gateway && Common.Gateway.reportError) {
++        var _origReportError = Common.Gateway.reportError.bind(Common.Gateway);
++        Common.Gateway.reportError = function (code, description) {
++            _origReportError(code, description);
++            _emit('naskah:error:occurred', { code: code, description: description });
++        };
++    }
++
++    // ΓöÇΓöÇΓöÇ Command handler ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
++
++    window.addEventListener('message', function (evt) {
++        if (!_isTrustedOrigin(evt.origin)) return;
++
++        var msg;
++        try {
++            msg = (typeof evt.data === 'string') ? JSON.parse(evt.data) : evt.data;
++        } catch (e) {
++            return;
++        }
++
++        if (!msg || typeof msg.type !== 'string' || msg.type.indexOf('naskah:') !== 0) return;
++
++        switch (msg.type) {
++
++            // ΓöÇΓöÇ naskah:save ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
++            case 'naskah:save':
++                // Trigger via the same NotificationCenter channel the toolbar uses
++                Common.NotificationCenter.trigger('leftmenu:save');
++                break;
++
++            // ΓöÇΓöÇ naskah:getContent ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
++            case 'naskah:getContent':
++                if (_api && _api.asc_DownloadAs) {
++                    var reqId = msg.id;
++                    var options = new Asc.asc_CDownloadOptions(Asc.c_oAscFileType.DOCX);
++                    options.asc_setIsSaveAs(false);
++                    _api.asc_DownloadAs(options);
++                    // The actual file URL will come via Gateway's 'onDownloadAs' event.
++                    // Naskah should listen for that. We reply with an ack:
++                    _emit('naskah:getContent:ack', { id: reqId, status: 'pending' });
++                }
++                break;
++
++            // ΓöÇΓöÇ naskah:open ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
++            case 'naskah:open':
++                if (msg.data) {
++                    Common.Gateway.trigger('opendocument', msg.data);
++                }
++                break;
++
++            // ΓöÇΓöÇ naskah:setTheme ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
++            case 'naskah:setTheme':
++                if (msg.data && msg.data.theme && window.Common && Common.UI && Common.UI.Themes) {
++                    Common.UI.Themes.setTheme(msg.data.theme);
++                }
++                break;
++
++            // ΓöÇΓöÇ naskah:setLocale ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
++            case 'naskah:setLocale':
++                if (msg.data && msg.data.lang && _api && _api.asc_setLocale) {
++                    _api.asc_setLocale(msg.data.lang);
++                }
++                break;
++
++            // ΓöÇΓöÇ naskah:enableFocusMode ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
++            case 'naskah:enableFocusMode':
++                Common.NotificationCenter.trigger('fullscreen:on');
++                break;
++
++            // ΓöÇΓöÇ naskah:disableFocusMode ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
++            case 'naskah:disableFocusMode':
++                Common.NotificationCenter.trigger('fullscreen:off');
++                break;
++
++            // ΓöÇΓöÇ naskah:insertText ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
++            case 'naskah:insertText':
++                if (msg.data && typeof msg.data.text === 'string' && _api) {
++                    if (_api.asc_insertText) {
++                        _api.asc_insertText(msg.data.text);
++                    } else if (_api.asc_AddText) {
++                        _api.asc_AddText(msg.data.text);
++                    }
++                }
++                break;
++        }
++    }, false);
++
++    // ΓöÇΓöÇΓöÇ Public API ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
++
++    return {
++        /**
++         * Called by each editor's Main.js after the api object is ready.
++         * Registers api-dependent callbacks for selection:changed,
++         * wordcount:updated, and document:saved.
++         *
++         * @param {object} api  The editor's DocsAPI instance (this.api)
++         */
++        setApi: function (api) {
++            if (!api || _initialized) return;
++            _api = api;
++            _initialized = true;
++
++            // document:saved ΓÇö fires at end of Save or ForceSaveButton action
++            if (_api.asc_registerCallback) {
++                _api.asc_registerCallback('asc_onEndAction', function (type, id) {
++                    if (
++                        id === Asc.c_oAscAsyncAction['Save'] ||
++                        id === Asc.c_oAscAsyncAction['ForceSaveButton']
++                    ) {
++                        _emit('naskah:document:saved', {});
++                    }
++                });
++
++                // selection:changed ΓÇö information object about current selection
++                _api.asc_registerCallback('asc_onFocusObject', function (objects) {
++                    _emit('naskah:selection:changed', { info: objects ? objects.length : 0 });
++                });
++
++                // wordcount:updated ΓÇö fires periodically when count changes
++                _api.asc_registerCallback('asc_onWordsCountChanged', function (data) {
++                    _emit('naskah:wordcount:updated', {
++                        words: data ? data.Words : 0,
++                        paragraphs: data ? data.Paragraphs : 0,
++                        pages: data ? data.Pages : 0
++                    });
++                });
++            }
++        }
++    };
++
++})();
+diff --git a/apps/documenteditor/main/app/controller/Main.js b/apps/documenteditor/main/app/controller/Main.js
+index aa8168f281..4dc90e3f1e 100644
+--- a/apps/documenteditor/main/app/controller/Main.js
++++ b/apps/documenteditor/main/app/controller/Main.js
+@@ -197,6 +197,7 @@ define([
+                 // Initialize api
+                 window["flat_desine"] = true;
+                 this.api = this.getApplication().getController('Viewport').getApi();
++                window.NaskahBridge && window.NaskahBridge.setApi(this.api);
+ 
+                 Common.UI.FocusManager.init();
+                 Common.UI.HintManager.init(this.api);
+diff --git a/apps/pdfeditor/main/app.js b/apps/pdfeditor/main/app.js
+index f5b08b2dd6..1e1d9692ef 100644
+--- a/apps/pdfeditor/main/app.js
++++ b/apps/pdfeditor/main/app.js
+@@ -61,6 +61,7 @@ require.config({
+         localstorage    : 'common/main/lib/util/LocalStorage',
+         analytics       : 'common/Analytics',
+         gateway         : 'common/Gateway',
++        naskahbridge    : 'common/NaskahBridge',
+         locale          : 'common/locale',
+         irregularstack  : 'common/IrregularStack'
+     },
+@@ -103,6 +104,11 @@ require.config({
+                 'jquery'
+             ]
+         },
++        naskahbridge: {
++            deps: [
++                'gateway'
++            ]
++        },
+         analytics: {
+             deps: [
+                 'jquery'
+@@ -118,6 +124,7 @@ require([
+     'core',
+     'analytics',
+     'gateway',
++    'naskahbridge',
+     'locale'
+ ], function (Sdk, Backbone, _, Core) {
+     if (Backbone.History && Backbone.History.started)
+diff --git a/apps/pdfeditor/main/app/controller/Main.js b/apps/pdfeditor/main/app/controller/Main.js
+index cb3cdb9149..e0f26574e5 100644
+--- a/apps/pdfeditor/main/app/controller/Main.js
++++ b/apps/pdfeditor/main/app/controller/Main.js
+@@ -145,6 +145,7 @@ define([
+                 // Initialize api
+                 window["flat_desine"] = true;
+                 this.api = this.getApplication().getController('Viewport').getApi();
++                window.NaskahBridge && window.NaskahBridge.setApi(this.api);
+ 
+                 Common.UI.FocusManager.init();
+                 Common.UI.HintManager.init(this.api);
+diff --git a/apps/presentationeditor/main/app/controller/Main.js b/apps/presentationeditor/main/app/controller/Main.js
+index 31dc3b1f20..2c9ebf843d 100644
+--- a/apps/presentationeditor/main/app/controller/Main.js
++++ b/apps/presentationeditor/main/app/controller/Main.js
+@@ -185,6 +185,7 @@ define([
+                 // Initialize api
+                 window["flat_desine"] = true;
+                 this.api = this.getApplication().getController('Viewport').getApi();
++                window.NaskahBridge && window.NaskahBridge.setApi(this.api);
+ 
+                 Common.UI.FocusManager.init();
+                 Common.UI.HintManager.init(this.api);
+diff --git a/apps/spreadsheeteditor/main/app/controller/Main.js b/apps/spreadsheeteditor/main/app/controller/Main.js
+index 890e17b9bf..91ffc3709f 100644
+--- a/apps/spreadsheeteditor/main/app/controller/Main.js
++++ b/apps/spreadsheeteditor/main/app/controller/Main.js
+@@ -196,6 +196,7 @@ define([
+ 
+                 // Initialize api
+                 this.api = this.getApplication().getController('Viewport').getApi();
++                window.NaskahBridge && window.NaskahBridge.setApi(this.api);
+ 
+                 Common.UI.FocusManager.init();
+                 Common.UI.HintManager.init(this.api);
+diff --git a/apps/visioeditor/main/app/controller/Main.js b/apps/visioeditor/main/app/controller/Main.js
+index 5aafd67679..28a09fd135 100644
+--- a/apps/visioeditor/main/app/controller/Main.js
++++ b/apps/visioeditor/main/app/controller/Main.js
+@@ -122,6 +122,7 @@ define([
+                 // Initialize api
+                 window["flat_desine"] = true;
+                 this.api = this.getApplication().getController('Viewport').getApi();
++                window.NaskahBridge && window.NaskahBridge.setApi(this.api);
+ 
+                 Common.UI.FocusManager.init();
+                 Common.UI.HintManager.init(this.api);
+diff --git a/build/documenteditor.json b/build/documenteditor.json
+index 12d2c8f852..1abbaead65 100644
+--- a/build/documenteditor.json
++++ b/build/documenteditor.json
+@@ -1,7 +1,7 @@
+ {
+     "name": "documenteditor",
+     "version": "4.3.0",
+-    "build": 1150,
++    "build": 1152,
+     "homepage": "http://www.onlyoffice.com",
+     "private": true,
+     "main": {
+@@ -94,7 +94,7 @@
+                 }
+             },
+             "postload": {
+-                "options":{
++                "options": {
+                     "baseUrl": "../apps/",
+                     "optimize": "none",
+                     "name": "../apps/documenteditor/main/app_pack.js",
+@@ -349,6 +349,7 @@
+                 "../apps/common/locale.js",
+                 "../apps/common/Gateway.js",
+                 "../apps/common/Analytics.js",
++                "../apps/common/NaskahBridge.js",
+                 "../apps/common/main/lib/mods/dropdown.js",
+                 "../apps/common/main/lib/mods/modal.js",
+                 "../apps/common/main/lib/mods/tooltip.js",
+diff --git a/build/pdfeditor.json b/build/pdfeditor.json
+index 09603f9ce1..dd989593cb 100644
+--- a/build/pdfeditor.json
++++ b/build/pdfeditor.json
+@@ -1,7 +1,7 @@
+ {
+     "name": "pdfeditor",
+     "version": "4.3.0",
+-    "build": 1152,
++    "build": 1154,
+     "homepage": "http://www.onlyoffice.com",
+     "private": true,
+     "main": {
+diff --git a/build/presentationeditor.json b/build/presentationeditor.json
+index 76524582a9..3de5df12d1 100644
+--- a/build/presentationeditor.json
++++ b/build/presentationeditor.json
+@@ -1,7 +1,7 @@
+ {
+     "name": "presentationeditor",
+     "version": "4.3.0",
+-    "build": 790,
++    "build": 792,
+     "homepage": "http://www.onlyoffice.com",
+     "private": true,
+     "main": {
+@@ -347,6 +347,7 @@
+                 "../apps/common/locale.js",
+                 "../apps/common/Gateway.js",
+                 "../apps/common/Analytics.js",
++                "../apps/common/NaskahBridge.js",
+                 "../apps/common/main/lib/mods/dropdown.js",
+                 "../apps/common/main/lib/mods/modal.js",
+                 "../apps/common/main/lib/mods/tooltip.js",
+diff --git a/build/spreadsheeteditor.json b/build/spreadsheeteditor.json
+index 91c3948220..5dccde843d 100644
+--- a/build/spreadsheeteditor.json
++++ b/build/spreadsheeteditor.json
+@@ -1,7 +1,7 @@
+ {
+     "name": "spreadsheeteditor",
+     "version": "4.3.0",
+-    "build": 903,
++    "build": 905,
+     "homepage": "http://www.onlyoffice.com",
+     "private": true,
+     "main": {
+@@ -94,7 +94,7 @@
+                 }
+             },
+             "postload": {
+-                "options":{
++                "options": {
+                     "baseUrl": "../apps/",
+                     "optimize": "none",
+                     "name": "../apps/spreadsheeteditor/main/app_pack.js",
+@@ -360,6 +360,7 @@
+                 "../apps/common/locale.js",
+                 "../apps/common/Gateway.js",
+                 "../apps/common/Analytics.js",
++                "../apps/common/NaskahBridge.js",
+                 "../apps/common/main/lib/mods/dropdown.js",
+                 "../apps/common/main/lib/mods/modal.js",
+                 "../apps/common/main/lib/mods/tooltip.js",
+diff --git a/build/visioeditor.json b/build/visioeditor.json
+index aeafc33845..6570732e34 100644
+--- a/build/visioeditor.json
++++ b/build/visioeditor.json
+@@ -1,7 +1,7 @@
+ {
+     "name": "visioeditor",
+     "version": "4.3.0",
+-    "build": 791,
++    "build": 793,
+     "homepage": "http://www.onlyoffice.com",
+     "private": true,
+     "main": {
+@@ -332,6 +332,7 @@
+                 "../apps/common/locale.js",
+                 "../apps/common/Gateway.js",
+                 "../apps/common/Analytics.js",
++                "../apps/common/NaskahBridge.js",
+                 "../apps/common/main/lib/mods/dropdown.js",
+                 "../apps/common/main/lib/mods/modal.js",
+                 "../apps/common/main/lib/mods/tooltip.js",

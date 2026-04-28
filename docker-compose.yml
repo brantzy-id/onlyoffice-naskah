@@ -4,10 +4,10 @@ services:
       context: ./wasm
       dockerfile: Dockerfile
     volumes:
-      - ./web-apps:/workspace/web-apps:ro
-      - ./build_tools:/workspace/build_tools:ro
+      - ./web-apps:/workspace/web-apps
+      - ./build_tools:/workspace/build_tools
       - ./output:/output
     working_dir: /workspace
     environment:
       - VERSION=${VERSION:-dev}
-    command: /workspace/build.sh ${VERSION:-dev}
+    command: ["/bin/sh", "-c", "/workspace/build.sh $${VERSION:-dev}"]

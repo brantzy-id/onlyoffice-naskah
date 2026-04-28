@@ -1,27 +1,32 @@
-#!/bin/bash
+#!/bin/sh
 set -e
 
-# Ambil versi dari argumen pertama; default ke "dev" jika tidak diberikan
 VERSION="${1:-dev}"
 
-echo "Building OnlyOffice WASM version: $VERSION"
+echo "Building OnlyOffice web-apps version: $VERSION"
 
-# Masuk ke direktori build_tools yang di-mount sebagai submodule
-cd /workspace/build_tools
+# Masuk ke build directory
+cd /workspace/web-apps/build
 
-# Jalankan configure.py untuk menyiapkan konfigurasi build
-# --module web-apps  : hanya build modul web-apps
-# --update 0         : jangan pull/update submodule (source sudah di-mount)
-# --branch ""        : tidak ada branch spesifik yang di-checkout
-echo "Configuring build..."
-python3 configure.py --module web-apps --update 0 --branch ""
+# Install node dependencies
+echo "Installing dependencies..."
+npm install
 
-# Jalankan proses build utama
-echo "Running make..."
-python3 make.py
+# Build only the 3 editors used by Naskah Platform
+# (document, spreadsheet, presentation — skip pdfeditor and visioeditor)
+echo "Running Grunt build (naskah target)..."
+./node_modules/.bin/grunt deploy-naskah
 
-# Salin hasil build ke direktori output yang di-mount dari host
-echo "Build complete. Copying output..."
-cp -r /workspace/build_tools/out/. /output/
+# Copy hasil build ke /output
+echo "Copying output to /output..."
+mkdir -p /output
+cp -r ../deploy/. /output/ 2>/dev/null || cp -r ../build/. /output/ 2>/dev/null || true
+
+# Copy Service Worker ke root output agar bisa diakses sebagai /sw.js
+if [ -f /workspace/sw/sw.js ]; then
+  cp /workspace/sw/sw.js /output/sw.js
+  echo "sw.js copied to output"
+fi
 
 echo "Done. Output in /output"
+ls /output
